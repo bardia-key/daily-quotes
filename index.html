@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Quotes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      color: #ffffff;
+      overflow: hidden;
+    }
+
+    .quote-container {
+      max-width: 720px;
+      width: 90%;
+      text-align: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .quote-text {
+      font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+      font-weight: 300;
+      line-height: 1.7;
+      letter-spacing: 0.02em;
+      color: rgba(255, 255, 255, 0.92);
+      white-space: pre-line;
+      opacity: 1;
+      transition: opacity 0.6s ease;
+    }
+
+    .quote-text.fade-out {
+      opacity: 0;
+    }
+
+    .quote-text.fade-in {
+      opacity: 1;
+    }
+
+    /* Next quote button */
+    .next-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+      outline: none;
+    }
+
+    .next-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.45);
+      color: rgba(255, 255, 255, 0.95);
+      transform: scale(1.08);
+    }
+
+    .next-btn:active {
+      transform: scale(0.96);
+    }
+
+    .next-btn svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    /* Progress ring around button */
+    .progress-ring {
+      position: fixed;
+      bottom: calc(2rem - 4px);
+      right: calc(2rem - 4px);
+      width: 56px;
+      height: 56px;
+      pointer-events: none;
+      transform: rotate(-90deg);
+    }
+
+    .progress-ring__track {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 2;
+    }
+
+    .progress-ring__fill {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.35);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-dasharray: 163.36;
+      stroke-dashoffset: 163.36;
+      transition: stroke-dashoffset 1s linear;
+    }
+
+    @media (max-width: 480px) {
+      .quote-text {
+        font-size: clamp(1.2rem, 5vw, 1.6rem);
+      }
+
+      .next-btn {
+        bottom: 1.25rem;
+        right: 1.25rem;
+      }
+
+      .progress-ring {
+        bottom: calc(1.25rem - 4px);
+        right: calc(1.25rem - 4px);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="quote-container">
+    <p class="quote-text" id="quoteText"></p>
+  </div>
+
+  <!-- Progress ring -->
+  <svg class="progress-ring" viewBox="0 0 56 56">
+    <circle class="progress-ring__track" cx="28" cy="28" r="26" />
+    <circle class="progress-ring__fill" id="progressRing" cx="28" cy="28" r="26" />
+  </svg>
+
+  <!-- Next quote button -->
+  <button class="next-btn" id="nextBtn" title="Next quote" aria-label="Show next quote">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  </button>
+
+  <!-- =====================================================================
+       QUOTES
+       Add or edit quotes here. Use \n for line breaks within a quote.
+       ===================================================================== -->
+  <script>
+    const QUOTES = [
+      "To learn, wander. To achieve, focus.",
+      "The amateur does not know what to do.\nThe master knows what not to do.",
+      "A good reputation is acquired by many actions; and can be lost by one. Be upon your guard, therefore, against those weaknesses which may risk it. Nothing can be more unjust than to judge a person by one single action; but the world is seldom just.",
+      "Challenge yourself when life is easy, so you'll be ready when life is hard.",
+      "A good life is one in which things do not go perfectly, but you find a way to have a good day regardless.",
+      "The mindset:\nConfident enough to start. Humble enough to keep learning.\n\nThe trap:\nToo humble to start. Or too confident to keep learning.",
+      "The modern world is optimized for convenience, not improvement.\nThe default path is usually the more convenient path. And I get it. Who wants their days to be a pain in the neck? I like sitting in air-conditioned rooms and watching my favorite shows too.\nBut the body and mind only grow when placed under a stimulus. If you want improvement, you have to choose something different than convenience.\nIt can be lovely to have a day where you do not push yourself, but it rarely works out well if you have a life where you do not push yourself.",
+      "Questions are answered as you move, not before you move. Moving forward with an answer that is partially correct will usually fill in the gaps faster than waiting until you come up with a plan that is perfectly correct.",
+      "The negative examples always spread farther and faster than the positive examples. In a world this big, you'll find at least one negative example every day.\nDon't let the existence of a bad example ruin your faith in the world. Good news is always quieter than bad news. Good behavior rarely stirs the pot or ignites emotion.\nBut no matter. We need role models all the same. Continue living the best way you know how.",
+      "Facts don't change our minds. Friendship does.",
+      "The Big Three Stoic parts:\n\nControl your perceptions.\nDirect your actions properly.\nWillingly accept what's outside your control.",
+      "Always remember that to argue, and win, is to break down the reality of the person you are arguing against. It is painful to lose your reality, so be kind, even if you are right.",
+      "Life is a constant balance between giving into the ease of distraction or overcoming the pain of discipline. It is not an exaggeration to say that our lives and our identities are defined in this delicate balance. What is life, if not the sum of a hundred thousand daily battles and tiny decisions to either gut it out or give it up?\n\nThis moment when you don't feel like doing the work? This is not a moment to be thrown away. This is not a dress rehearsal. This moment is your life as much as any other moment. Spend it in a way that will make you proud.",
+      "There are two ways to grow: by adding or by shedding.\nDo you need to add something or do you need to shed something?",
+      "Somewhere, at this very moment, someone appears to be doing better than you. Their progress is faster. Perhaps their business grows more quickly or their career is advancing rapidly. Maybe dating is easy for them or their progress in the gym seems to come effortlessly. In any domain, there is always another life that shimmers more than your own.\n\nBut comparison is a poor use of energy. You were not meant to inhabit someone else's story. You have your own work to do. The goal is not to beat their life, the goal is to live your life. Keep your eyes on your own paper. Stay on the path and continue forward, even when progress feels slow.",
+      "Compete externally and you compare.\nCompete internally and you improve.",
+      "The more you create, the more powerful you become.\nThe more you consume, the more powerful others become.",
+      "To simplify before you understand the details is ignorance.\nTo simplify after you understand the details is genius.",
+      "Work is endless. Exercise is endless. Parenting is endless. Same with marriage, writing, investing, creating, and more. You get to choose the parts of your life, but many of the important things in life cannot be \"finished.\"\n\nDo not approach an endless game with a finite mindset. The objective is not to be done, but to settle into a daily lifestyle you can sustain and that allows you to make daily progress on the areas that matter.\n\nEmbrace the fact that life is continual and look for ways to enjoy the daily practice.",
+      "If the path is crowded, differentiate.\nIf the path is empty, validate.",
+    ];
+  </script>
+
+  <script>
+    (() => {
+      const INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
+      const CIRCUMFERENCE = 2 * Math.PI * 26; // matches r="26"
+
+      let currentIndex = 0;
+      let autoTimer = null;
+      let progressStart = null;
+      let progressRafId = null;
+
+      const quoteEl = document.getElementById('quoteText');
+      const nextBtn = document.getElementById('nextBtn');
+      const ringFill = document.getElementById('progressRing');
+
+      ringFill.style.strokeDasharray = CIRCUMFERENCE;
+      ringFill.style.strokeDashoffset = CIRCUMFERENCE;
+
+      // Shuffle array (Fisher-Yates)
+      function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      let shuffled = shuffle(QUOTES);
+
+      function nextIndex() {
+        currentIndex = (currentIndex + 1) % shuffled.length;
+        if (currentIndex === 0) {
+          shuffled = shuffle(QUOTES); // re-shuffle when cycle completes
+        }
+      }
+
+      function showQuote(text) {
+        quoteEl.classList.add('fade-out');
+        setTimeout(() => {
+          quoteEl.textContent = text;
+          quoteEl.classList.remove('fade-out');
+        }, 600);
+      }
+
+      // Progress ring animation
+      function startProgress() {
+        cancelAnimationFrame(progressRafId);
+        progressStart = performance.now();
+
+        function tick(now) {
+          const elapsed = now - progressStart;
+          const fraction = Math.min(elapsed / INTERVAL_MS, 1);
+          const offset = CIRCUMFERENCE * (1 - fraction);
+          ringFill.style.strokeDashoffset = offset;
+
+          if (fraction < 1) {
+            progressRafId = requestAnimationFrame(tick);
+          }
+        }
+
+        progressRafId = requestAnimationFrame(tick);
+      }
+
+      function scheduleNext() {
+        clearTimeout(autoTimer);
+        startProgress();
+        autoTimer = setTimeout(() => {
+          nextIndex();
+          showQuote(shuffled[currentIndex]);
+          scheduleNext();
+        }, INTERVAL_MS);
+      }
+
+      // Init
+      showQuote(shuffled[currentIndex]);
+      scheduleNext();
+
+      // Manual next
+      nextBtn.addEventListener('click', () => {
+        nextIndex();
+        showQuote(shuffled[currentIndex]);
+        scheduleNext(); // reset timer on manual advance
+      });
+
+      // Pause timer when tab is hidden, resume when visible
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          clearTimeout(autoTimer);
+          cancelAnimationFrame(progressRafId);
+        } else {
+          scheduleNext();
+        }
+      });
+    })();
+  </script>
+
+</body>
+</html>
